@@ -25,12 +25,12 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///hbnb.db'
 
-def get_config(config_name):
-    if config_name == 'development':
+def get_config(config_class):
+    if config_class == 'development':
         return DevelopmentConfig
-    elif config_name == 'testing':
+    elif config_class == 'testing':
         return TestingConfig
-    elif config_name == 'production':
+    elif config_class == 'production':
         return ProductionConfig
     else:
         return Config

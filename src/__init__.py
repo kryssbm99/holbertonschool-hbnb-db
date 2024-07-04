@@ -46,8 +46,8 @@ def create_app(config_class):
     jwt = JWTManager(app)
 
     # Register blueprints
-    from src.routes.auth import auth_bp
-    app.register_blueprint(auth_bp, url_prefix='/')
+    from src.routes.security import security_bp
+    app.register_blueprint(security_bp, url_prefix='/')
 
    
     with app.app_context():
