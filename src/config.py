@@ -6,77 +6,31 @@ This module exports configuration classes for the Flask application.
 - ProductionConfig
 
 """
-
-from abc import ABC
 import os
 
-
-class Config(ABC):
-    """
-    Initial configuration settings
-    This class should not be instantiated directly
-    """
-
-    DEBUG = False
-    TESTING = False
-
+class Config:
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///hbnb.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-
 class DevelopmentConfig(Config):
-    """
-    Development configuration settings
-    This configuration is used when running the application locally
-
-    This is useful for development and debugging purposes.
-
-    To check if the application is running in development mode, you can use:
-    ```
-    app = Flask(__name__)
-
-    if app.debug:
-        # Do something
-    ```
-    """
-
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL", "sqlite:///hbnb_dev.db")
     DEBUG = True
-
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///hbnb.db'
 
 class TestingConfig(Config):
-    """
-    Testing configuration settings
-    This configuration is used when running tests.
-    You can enabled/disable things across the application
-
-    To check if the application is running in testing mode, you can use:
-    ```
-    app = Flask(__name__)
-
-    if app.testing:
-        # Do something
-    ```
-
-    """
-
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///hbnb_test.db'
+    WTF_CSRF_ENABLED = False
 
 class ProductionConfig(Config):
-    """
-    Production configuration settings
-    This configuration is used when you create a
-    production build of the application
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///hbnb.db'
 
-    The debug or testing options are disabled in this configuration.
-    """
-
-    TESTING = False
-    DEBUG = False
-
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL",
-        "postgresql://user:password@localhost/hbnb_prod"
-    )
+def get_config(config_name):
+    if config_name == 'development':
+        return DevelopmentConfig
+    elif config_name == 'testing':
+        return TestingConfig
+    elif config_name == 'production':
+        return ProductionConfig
+    else:
+        return Config

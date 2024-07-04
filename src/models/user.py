@@ -2,72 +2,47 @@
 User related functionality
 """
 
-from src.models.base import Base
+from .base import Base
+from src import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
-class User(Base):
+class User(Base, db.Model):
     """User representation"""
+    tablename__ = 'users'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    updated_at = db.Column(db.DateTime, onupdate=db.func.current_timestamp())
+    
+    """Password Config"""
+    def set_password(self, password):
+        
+        self.password_hash = generate_password_hash(password)
 
-    email: str
-    first_name: str
-    last_name: str
+    def check_password(self, password):
+       
+        return check_password_hash(self.password_hash, password)
 
-    def __init__(self, email: str, first_name: str, last_name: str, **kw):
-        """Dummy init"""
-        super().__init__(**kw)
-        self.email = email
-        self.first_name = first_name
-        self.last_name = last_name
-
-    def __repr__(self) -> str:
-        """Dummy repr"""
-        return f"<User {self.id} ({self.email})>"
-
-    def to_dict(self) -> dict:
-        """Dictionary representation of the object"""
+    def to_dict(self):
         return {
-            "id": self.id,
-            "email": self.email,
-            "first_name": self.first_name,
-            "last_name": self.last_name,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
-        }
+            'id': self.id,
+            'email': self.email,
+            'is_admin': self.is_admin,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at,
+    }
+                
+    @staticmethod
+    def create(data):
+        return User(id=data['id'], email=data['email'], password=data['password'], is_admin=data['is_admin'])
 
     @staticmethod
-    def create(user: dict) -> "User":
-        """Create a new user"""
-        from src.persistence import repo
-
-        users: list["User"] = User.get_all()
-
-        for u in users:
-            if u.email == user["email"]:
-                raise ValueError("User already exists")
-
-        new_user = User(**user)
-
-        repo.save(new_user)
-
-        return new_user
-
-    @staticmethod
-    def update(user_id: str, data: dict) -> "User | None":
-        """Update an existing user"""
-        from src.persistence import repo
-
-        user: User | None = User.get(user_id)
-
-        if not user:
-            return None
-
-        if "email" in data:
-            user.email = data["email"]
-        if "first_name" in data:
-            user.first_name = data["first_name"]
-        if "last_name" in data:
-            user.last_name = data["last_name"]
-
-        repo.update(user)
-
+    def update(user, data):
+        user.email = data.get('email', user.email)
+        user.password = data.get('password', user.password)
+        user.is_admin = data.get('is_admin', user.is_admin)
         return user

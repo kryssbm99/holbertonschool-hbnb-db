@@ -2,61 +2,30 @@
 Country related functionality
 """
 
+from src import db
+from src.models.base import Base
 
-class Country:
-    """
-    Country representation
+class Country(db.Model):
+    __tablename__ = 'countries'
 
-    This class does NOT inherit from Base, you can't delete or update a country
+    id = db.Column(db.String(36), primary_key=True)
+    name = db.Column(db.String(128), nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    updated_at = db.Column(db.DateTime, onupdate=db.func.current_timestamp())
 
-    This class is used to get and list countries
-    """
-
-    name: str
-    code: str
-    cities: list
-
-    def __init__(self, name: str, code: str, **kw) -> None:
-        """Dummy init"""
-        super().__init__(**kw)
-        self.name = name
-        self.code = code
-
-    def __repr__(self) -> str:
-        """Dummy repr"""
-        return f"<Country {self.code} ({self.name})>"
-
-    def to_dict(self) -> dict:
-        """Returns the dictionary representation of the country"""
+    def to_dict(self):
         return {
-            "name": self.name,
-            "code": self.code,
+            'id': self.id,
+            'name': self.name,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at,
         }
 
     @staticmethod
-    def get_all() -> list["Country"]:
-        """Get all countries"""
-        from src.persistence import repo
-
-        countries: list["Country"] = repo.get_all("country")
-
-        return countries
+    def create(data):
+        return Country(id=data['id'], name=data['name'])
 
     @staticmethod
-    def get(code: str) -> "Country | None":
-        """Get a country by its code"""
-        for country in Country.get_all():
-            if country.code == code:
-                return country
-        return None
-
-    @staticmethod
-    def create(name: str, code: str) -> "Country":
-        """Create a new country"""
-        from src.persistence import repo
-
-        country = Country(name, code)
-
-        repo.save(country)
-
+    def update(country, data):
+        country.name = data.get('name', country.name)
         return country

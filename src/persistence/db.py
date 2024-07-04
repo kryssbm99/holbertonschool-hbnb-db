@@ -12,32 +12,39 @@
     - reload (which can be empty)
 """
 
-from src.models.base import Base
+from src import db
 from src.persistence.repository import Repository
-
+from src.models.user import User
+from src.models.city import City
+from src.models.country import Country
+from src.models.place import Place
+from src.models.review import Review
+from src.models.amenity import Amenity
 
 class DBRepository(Repository):
-    """Dummy DB repository"""
+    def __init__(self):
+        self.user_model = User
+        self.city_model = City
+        self.country_model = Country
+        self.place_model = Place
+        self.review_model = Review
+        self.amenity_model = Amenity
 
-    def __init__(self) -> None:
-        """Not implemented"""
+    def get(self, model, id):
+        return model.query.get(id)
 
-    def get_all(self, model_name: str) -> list:
-        """Not implemented"""
-        return []
+    def get_all(self, model):
+        return model.query.all()
 
-    def get(self, model_name: str, obj_id: str) -> Base | None:
-        """Not implemented"""
+    def save(self, obj):
+        db.session.add(obj)
+        db.session.commit()
 
+    def delete(self, obj):
+        db.session.delete(obj)
+        db.session.commit()
+
+    def update(self, obj):
+        db.session.commit()
+        
     def reload(self) -> None:
-        """Not implemented"""
-
-    def save(self, obj: Base) -> None:
-        """Not implemented"""
-
-    def update(self, obj: Base) -> Base | None:
-        """Not implemented"""
-
-    def delete(self, obj: Base) -> bool:
-        """Not implemented"""
-        return False
