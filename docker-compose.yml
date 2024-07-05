@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: gunicorn -b 0.0.0.0:5002 --timeout 120 hbnb:app
+    volumes:
+      - .:/app  # Mount the current directory to /app inside the container
+    ports:
+      - "5002:5002"  # Map port 5002 on the host to port 5002 on the container
+    environment:
+      - FLASK_APP=hbnb.py  # Set the Flask app entry point
+      - ENV=production  # Set the environment to production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/prod_db  # Database connection URL
+      - JWT_SECRET_KEY=Anibalhola  # Secret key for JWT
+    depends_on:
+      - db  # Ensure the database service is started before the web service
+
+  db:
+    image: postgres:13  # Use the official Postgres 13 image from Docker Hub
+    environment:
+      POSTGRES_DB: prod_db  # Name of the database to create
+      POSTGRES_USER: postgres  # Postgres user
+      POSTGRES_PASSWORD: postgres  # Postgres password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persist Postgres data in a Docker volume
+
+volumes:
+  postgres_data:  # Define the Docker volume for Postgres data

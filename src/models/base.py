@@ -1,14 +1,16 @@
 from src import db
-from sqlalchemy.ext.declarative import declared_base
+from sqlalchemy.ext.declarative import declarative_base
 import uuid
 from datetime import datetime
 
-class Base:
+Base = declarative_base()
+
+class Base():
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    @declared_base
+    @declarative_base
     def __tablename__(cls):
         return cls.__name__.lower() + 's'
 
