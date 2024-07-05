@@ -11,6 +11,7 @@ from ..models import db
 # Create a Blueprint for the user-related endpoints
 users_bp = Blueprint('users_bp', __name__)
 
+
 @users_bp.route('/users', methods=['POST'], strict_slashes=False)
 @jwt_required()
 def create_user():
@@ -23,11 +24,12 @@ def create_user():
         JSON: The newly created user's data or an error message.
     """
     data = request.get_json()
-    
+
     # Create a new user instance
     user = User.create(data)
-    
+
     return jsonify(user.to_dict()), 201
+
 
 @users_bp.route('/users/<int:user_id>/', methods=['PUT'], strict_slashes=False)
 @jwt_required()
@@ -44,10 +46,10 @@ def update_user(user_id):
         JSON: The updated user's data or an error message.
     """
     data = request.get_json()
-    
+
     # Retrieve the user from the database
     user = User.query.get(user_id)
-    
+
     # Check if the user exists and update the details
     if user:
         user.email = data.get('email', user.email)
@@ -58,6 +60,7 @@ def update_user(user_id):
         return jsonify(user.to_dict()), 200
     else:
         return jsonify({"msg": "User not found"}), 404
+
 
 @users_bp.route('/users/<int:user_id>/', methods=['DELETE'], strict_slashes=False)
 @jwt_required()
@@ -74,7 +77,7 @@ def delete_user(user_id):
         JSON: A message indicating the result of the operation.
     """
     user = User.query.get(user_id)
-    
+
     # Check if the user exists and delete it
     if user:
         db.session.delete(user)
@@ -83,13 +86,14 @@ def delete_user(user_id):
     else:
         return jsonify({"msg": "User not found"}), 404
 
+
 @users_bp.route('/users/<int:user_id>/', methods=['GET'], strict_slashes=False)
 @jwt_required()
 def get_user(user_id):
     """
     Fetch a single user by ID.
 
-    This endpoint allows a logged-in user to fetch details of a specific user by ID.
+    This endpoint allows a logged-in user to fetch details of a user by ID.
 
     Args:
         user_id (int): The ID of the user.
@@ -99,12 +103,13 @@ def get_user(user_id):
     """
     # Retrieve the user from the database
     user = User.query.get(user_id)
-    
+
     # Check if the user exists and return the details
     if user:
         return jsonify(user.to_dict()), 200
     else:
         return jsonify({"msg": "User not found"}), 404
+
 
 @users_bp.route('/users/', methods=['GET'], strict_slashes=False)
 @jwt_required()
@@ -119,6 +124,6 @@ def get_users():
     """
     # Retrieve all users from the database
     users = User.query.all()
-    
+
     # Convert each user to a dictionary and return as JSON
     return jsonify([user.to_dict() for user in users]), 200
